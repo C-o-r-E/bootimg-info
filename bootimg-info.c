@@ -23,10 +23,11 @@ static char print_hash(const uint8_t *string)
 
 int main(int argc, char** argv)
 {
+	int ret;
     char tmp[PATH_MAX];
     char* filename = NULL;
     int base = 0;
-    char id_sha[0];
+    char id_sha[32];
     
     argc--;
     if (argc > 0) {
@@ -57,10 +58,22 @@ int main(int argc, char** argv)
         printf("bootimg-info: Android boot magic not found!\n");
         return 1;
     }
-    fseek(f, i, SEEK_SET);
-    total += fread(&header, sizeof(header), 1, f);
+	printf("Debug: looks like a boot image! (i=%d)\n", i);
+
+    ret = fseek(f, i, SEEK_SET);
+	if(ret)
+	{
+		printf("Debug: failed to seek\n");
+	}
+    total += fread(&header, 1, sizeof(header), f);
+	printf("Debug: total bytes read: %d\n", total);
+	printf("Debug: sizeof(header): %lu\n", sizeof(header));
+
     base = header.kernel_addr - 0x00008000;
-    sprintf(id_sha, "%s", (char *)header.id);
+
+	int hash_len = 0;
+    hash_len = sprintf(id_sha, "%s", (char *)header.id);
+	printf("Debug: hash_len: %d\n", hash_len);
     
     printf(" Android Boot Image Info Utility\n\n");
     
